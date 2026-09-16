@@ -19,8 +19,8 @@ if st.button("Genera TXT") and value.strip():
         # Genera barcode Code128
         code128 = barcode.get("code128", value.strip(), writer=ImageWriter())
 
-        # Ottieni il pattern delle barre (True=BAR, False=SPACE)
-        pattern = code128.build()
+        # Ottieni pattern barre/spazi dal writer (sempre coppie)
+        pattern = code128.writer._build(code128)
 
         # Converti in testo leggibile
         pattern_txt = "\n".join(
