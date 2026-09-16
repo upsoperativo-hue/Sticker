@@ -59,8 +59,8 @@ if st.button("Genera barcode") and value.strip():
         buffer.seek(0)
         img = Image.open(buffer).convert("RGB")
 
-        # Mostra anteprima
-        st.image(img, caption=f"Barcode: {value.strip()}", use_column_width=False)
+        # Mostra anteprima (usa use_container_width al posto di use_column_width)
+        st.image(img, caption=f"Barcode: {value.strip()}", use_container_width=False)
 
         # Download PNG
         today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
