@@ -16,24 +16,24 @@ st.write(
 
 value = st.text_input("Valore barcode", "")
 
-# Parametri ottimali per sticker 50×15 mm
-DEFAULT_MODULE_WIDTH = 0.38   # mm
-DEFAULT_MODULE_HEIGHT = 12    # mm
+# Parametri ridotti per far entrare il barcode nello sticker 50×15 mm
+DEFAULT_MODULE_WIDTH = 0.20   # ridotto
+DEFAULT_MODULE_HEIGHT = 8     # ridotto
 
 col1, col2 = st.columns(2)
 with col1:
     module_width = st.number_input(
         "Spessore barre (module_width)",
-        min_value=0.20,
-        max_value=1.00,
+        min_value=0.10,
+        max_value=0.50,
         value=DEFAULT_MODULE_WIDTH,
-        step=0.02
+        step=0.01
     )
 with col2:
     module_height = st.number_input(
         "Altezza barre (module_height)",
-        min_value=8,
-        max_value=30,
+        min_value=5,
+        max_value=20,
         value=DEFAULT_MODULE_HEIGHT,
         step=1
     )
@@ -49,17 +49,17 @@ if st.button("Genera barcode") and value.strip():
             {
                 "module_width": module_width,
                 "module_height": module_height,
-                "font_size": 10,
-                "text_distance": 4,
-                "quiet_zone": 3,
+                "font_size": 8,        # ridotto
+                "text_distance": 2,    # ridotto
+                "quiet_zone": 1,       # ridotto
             },
         )
 
-        # FIX: converti buffer → immagine PIL RGB
+        # Converti buffer → immagine PIL RGB
         buffer.seek(0)
         img = Image.open(buffer).convert("RGB")
 
-        # Mostra anteprima (usa use_container_width al posto di use_column_width)
+        # Mostra anteprima
         st.image(img, caption=f"Barcode: {value.strip()}", use_container_width=False)
 
         # Download PNG
