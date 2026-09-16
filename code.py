@@ -50,7 +50,7 @@ if st.button("Genera barcode") and value.strip():
                 "module_width": module_width,
                 "module_height": module_height,
                 "font_size": 10,
-                "text_distance": 3,
+                "text_distance": 4,
                 "quiet_zone": 3,
             },
         )
