@@ -16,15 +16,15 @@ st.write(
 
 value = st.text_input("Valore barcode", "")
 
-# Parametri ridotti per far entrare il barcode nello sticker 50×15 mm
-DEFAULT_MODULE_WIDTH = 0.20   # ridotto
-DEFAULT_MODULE_HEIGHT = 8     # ridotto
+# Parametri ridotti del 150%
+DEFAULT_MODULE_WIDTH = 0.13
+DEFAULT_MODULE_HEIGHT = 5
 
 col1, col2 = st.columns(2)
 with col1:
     module_width = st.number_input(
         "Spessore barre (module_width)",
-        min_value=0.10,
+        min_value=0.05,
         max_value=0.50,
         value=DEFAULT_MODULE_WIDTH,
         step=0.01
@@ -32,7 +32,7 @@ with col1:
 with col2:
     module_height = st.number_input(
         "Altezza barre (module_height)",
-        min_value=5,
+        min_value=3,
         max_value=20,
         value=DEFAULT_MODULE_HEIGHT,
         step=1
@@ -40,7 +40,6 @@ with col2:
 
 if st.button("Genera barcode") and value.strip():
     try:
-        # Genera barcode Code128
         code128 = barcode.get("code128", value.strip(), writer=ImageWriter())
 
         buffer = BytesIO()
@@ -49,20 +48,17 @@ if st.button("Genera barcode") and value.strip():
             {
                 "module_width": module_width,
                 "module_height": module_height,
-                "font_size": 8,        # ridotto
-                "text_distance": 2,    # ridotto
-                "quiet_zone": 1,       # ridotto
+                "font_size": 5,        # ridotto del 150%
+                "text_distance": 4,    # richiesto
+                "quiet_zone": 1,       # minimo sicuro
             },
         )
 
-        # Converti buffer → immagine PIL RGB
         buffer.seek(0)
         img = Image.open(buffer).convert("RGB")
 
-        # Mostra anteprima
         st.image(img, caption=f"Barcode: {value.strip()}", use_container_width=False)
 
-        # Download PNG
         today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"BARCODE_{value.strip()}_{today_str}.png"
 
