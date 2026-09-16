@@ -1,40 +1,76 @@
 import streamlit as st
 from io import BytesIO
+from datetime import datetime
+import barcode
+from barcode.writer import ImageWriter
+from PIL import Image
 
-st.set_page_config(page_title="Barcode Zebra ZPL", page_icon="🏷️")
-st.title("Generatore Barcode ZPL per Zebra (Sticker 50×15 mm)")
+st.set_page_config(page_title="Barcode Zebra", page_icon="🏷️")
+st.title("Generatore Barcode per Sticker Zebra (50×15 mm)")
 
 st.write(
-    "Inserisci il valore da codificare. "
-    "Il tool genera codice ZPL compatibile con tutte le stampanti Zebra."
+    "Inserisci il valore da codificare (tracking, bag ID, ecc.). "
+    "Il barcode verrà generato in formato PNG, ottimizzato per etichette Zebra "
+    "con area viva 50 mm × 15 mm."
 )
 
 value = st.text_input("Valore barcode", "")
 
-def generate_zpl(value):
-    return f"""
-^XA
-^PW400
-^LL120
-^FO20,10
-^BY2,2,40
-^BCN,40,Y,N,N
-^FD{value}^FS
-^XZ
-"""
+# Parametri ottimali per sticker 50×15 mm
+DEFAULT_MODULE_WIDTH = 0.38   # mm
+DEFAULT_MODULE_HEIGHT = 12    # mm
 
-if st.button("Genera ZPL") and value.strip():
-    zpl_code = generate_zpl(value.strip())
+col1, col2 = st.columns(2)
+with col1:
+    module_width = st.number_input(
+        "Spessore barre (module_width)",
+        min_value=0.20,
+        max_value=1.00,
+        value=DEFAULT_MODULE_WIDTH,
+        step=0.02
+    )
+with col2:
+    module_height = st.number_input(
+        "Altezza barre (module_height)",
+        min_value=8,
+        max_value=30,
+        value=DEFAULT_MODULE_HEIGHT,
+        step=1
+    )
 
-    st.code(zpl_code, language="text")
+if st.button("Genera barcode") and value.strip():
+    # Genera barcode Code128
+    code128 = barcode.get("code128", value.strip(), writer=ImageWriter())
 
-    buffer = BytesIO(zpl_code.encode("utf-8"))
+    buffer = BytesIO()
+    code128.write(
+        buffer,
+        {
+            "module_width": module_width,
+            "module_height": module_height,
+            "font_size": 10,
+            "text_distance": 1.5,
+            "quiet_zone": 3,
+        },
+    )
+
+    # FIX: converti buffer → immagine PIL
+    buffer.seek(0)
+    img = Image.open(buffer)
+
+    # Mostra anteprima
+    st.image(img, caption=f"Barcode: {value.strip()}", use_column_width=False)
+
+    # Download PNG
+    today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"BARCODE_{value.strip()}_{today_str}.png"
 
     st.download_button(
-        "Scarica file ZPL",
+        "Scarica barcode (PNG)",
         data=buffer.getvalue(),
-        file_name=f"BARCODE_{value.strip()}.zpl",
-        mime="text/plain"
+        file_name=filename,
+        mime="image/png",
     )
+
 else:
-    st.info("Inserisci un valore e premi 'Genera ZPL'.")
+    st.info("Inserisci un valore e premi 'Genera barcode'.")
