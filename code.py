@@ -26,15 +26,15 @@ with col1:
         "Spessore barre (module_width)",
         min_value=0.03,
         max_value=0.30,
-        value=DEFAULT_MODULE_WIDTH,
+        value=float(DEFAULT_MODULE_WIDTH),
         step=0.005
     )
 with col2:
     module_height = st.number_input(
         "Altezza barre (module_height)",
-        min_value=1,
-        max_value=15,
-        value=DEFAULT_MODULE_HEIGHT,
+        min_value=1.0,
+        max_value=15.0,
+        value=float(DEFAULT_MODULE_HEIGHT),
         step=0.5
     )
 
@@ -46,8 +46,8 @@ if st.button("Genera barcode") and value.strip():
         code128.write(
             buffer,
             {
-                "module_width": module_width,
-                "module_height": module_height,
+                "module_width": float(module_width),
+                "module_height": float(module_height),
                 "font_size": 3,        # ridotto del 200%
                 "text_distance": 3,    # richiesto
                 "quiet_zone": 1,       # minimo sicuro
