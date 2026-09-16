@@ -4,8 +4,8 @@ from datetime import datetime
 import barcode
 from barcode.writer import SVGWriter
 
-st.set_page_config(page_title="Barcode SVG Perfetto", page_icon="🔧")
-st.title("Barcode SVG leggibile per sticker 50×15 mm")
+st.set_page_config(page_title="Barcode SVG Clean", page_icon="🔧")
+st.title("Barcode SVG leggibile")
 
 value = st.text_input("Valore barcode", "")
 
@@ -17,29 +17,22 @@ if st.button("Genera SVG") and value.strip():
         code128.write(
             buffer,
             {
-                "module_width": 0.20,     # modulo minimo leggibile
-                "module_height": 8,       # altezza barre
+                "module_width": 0.20,
+                "module_height": 8,
                 "font_size": 8,
                 "text_distance": 3,
-                "quiet_zone": 3,          # margine bianco corretto
+                "quiet_zone": 3,
             },
         )
 
-        svg = buffer.getvalue().decode("utf-8")
-
-        # Inseriamo dimensioni fisiche SENZA ridefinire width/height
-        # Aggiungiamo viewBox e lasciamo width/height originali
-        svg = svg.replace(
-            "<svg ",
-            '<svg viewBox="0 0 400 120" width="50mm" height="15mm" preserveAspectRatio="xMidYMid meet" '
-        )
+        svg_data = buffer.getvalue()
 
         today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"BARCODE_{value.strip()}_{today_str}.svg"
 
         st.download_button(
-            "Scarica barcode (SVG leggibile)",
-            data=svg.encode("utf-8"),
+            "Scarica barcode (SVG)",
+            data=svg_data,
             file_name=filename,
             mime="image/svg+xml",
         )
