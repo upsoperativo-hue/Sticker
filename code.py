@@ -39,38 +39,42 @@ with col2:
     )
 
 if st.button("Genera barcode") and value.strip():
-    # Genera barcode Code128
-    code128 = barcode.get("code128", value.strip(), writer=ImageWriter())
+    try:
+        # Genera barcode Code128
+        code128 = barcode.get("code128", value.strip(), writer=ImageWriter())
 
-    buffer = BytesIO()
-    code128.write(
-        buffer,
-        {
-            "module_width": module_width,
-            "module_height": module_height,
-            "font_size": 10,
-            "text_distance": 1.5,
-            "quiet_zone": 3,
-        },
-    )
+        buffer = BytesIO()
+        code128.write(
+            buffer,
+            {
+                "module_width": module_width,
+                "module_height": module_height,
+                "font_size": 10,
+                "text_distance": 1.5,
+                "quiet_zone": 3,
+            },
+        )
 
-    # FIX: converti buffer → immagine PIL RGB
-    buffer.seek(0)
-    img = Image.open(buffer).convert("RGB")
+        # FIX: converti buffer → immagine PIL RGB
+        buffer.seek(0)
+        img = Image.open(buffer).convert("RGB")
 
-    # Mostra anteprima
-    st.image(img, caption=f"Barcode: {value.strip()}", use_column_width=False)
+        # Mostra anteprima
+        st.image(img, caption=f"Barcode: {value.strip()}", use_column_width=False)
 
-    # Download PNG
-    today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"BARCODE_{value.strip()}_{today_str}.png"
+        # Download PNG
+        today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"BARCODE_{value.strip()}_{today_str}.png"
 
-    st.download_button(
-        "Scarica barcode (PNG)",
-        data=buffer.getvalue(),
-        file_name=filename,
-        mime="image/png",
-    )
+        st.download_button(
+            "Scarica barcode (PNG)",
+            data=buffer.getvalue(),
+            file_name=filename,
+            mime="image/png",
+        )
+
+    except Exception as e:
+        st.error(f"Errore nella generazione del barcode: {e}")
 
 else:
     st.info("Inserisci un valore e premi 'Genera barcode'.")
