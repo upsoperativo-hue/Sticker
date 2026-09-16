@@ -54,9 +54,9 @@ if st.button("Genera barcode") and value.strip():
         },
     )
 
-    # FIX: converti buffer → immagine PIL
+    # FIX: converti buffer → immagine PIL RGB
     buffer.seek(0)
-    img = Image.open(buffer)
+    img = Image.open(buffer).convert("RGB")
 
     # Mostra anteprima
     st.image(img, caption=f"Barcode: {value.strip()}", use_column_width=False)
