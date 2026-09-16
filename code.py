@@ -2,57 +2,50 @@ import streamlit as st
 from io import BytesIO
 from datetime import datetime
 import barcode
-from barcode.writer import ImageWriter
+from barcode.writer import SVGWriter
 
-st.set_page_config(page_title="Barcode Zebra TXT (bits)", page_icon="📄")
-st.title("Generatore Barcode TXT (sequenza di barre 1/0)")
+st.set_page_config(page_title="Barcode SVG", page_icon="🔧")
+st.title("Generatore Barcode SVG (perfetto per sticker 50×15 mm)")
 
 st.write(
-    "Inserisci il valore da codificare (tracking, bag ID, ecc.). "
-    "Il barcode verrà generato come file TXT contenente la sequenza di bit "
-    "(1 = barra, 0 = spazio)."
+    "Inserisci il valore da codificare. "
+    "Il barcode verrà generato in formato SVG vettoriale, senza puntini."
 )
 
 value = st.text_input("Valore barcode", "")
 
-if st.button("Genera TXT") and value.strip():
+if st.button("Genera SVG") and value.strip():
     try:
-        # Genera barcode Code128
-        code128 = barcode.get("code128", value.strip(), writer=ImageWriter())
+        # Genera barcode Code128 in SVG
+        code128 = barcode.get("code128", value.strip(), writer=SVGWriter())
 
-        # Pattern interno del barcode
-        pattern = code128.build()
+        buffer = BytesIO()
+        code128.write(
+            buffer,
+            {
+                "module_width": 0.20,
+                "module_height": 8,
+                "font_size": 10,
+                "text_distance": 3,
+                "quiet_zone": 3,
+            },
+        )
 
-        bits = []
-
-        # Converti pattern in sequenza di 1/0
-        for item in pattern:
-            # item può essere una tupla o struttura più complessa:
-            # prendiamo i primi due elementi come (is_bar, width)
-            try:
-                is_bar = bool(item[0])
-                width = int(item[1])
-                bits.append(("1" if is_bar else "0") * width)
-            except Exception:
-                # Se non è nel formato atteso, lo ignoriamo
-                continue
-
-        bit_string = "".join(bits)
-
-        buffer_txt = BytesIO(bit_string.encode("utf-8"))
+        buffer.seek(0)
+        svg_data = buffer.getvalue()
 
         today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"BARCODE_{value.strip()}_{today_str}.txt"
+        filename = f"BARCODE_{value.strip()}_{today_str}.svg"
 
         st.download_button(
-            "Scarica barcode (TXT)",
-            data=buffer_txt.getvalue(),
+            "Scarica barcode (SVG)",
+            data=svg_data,
             file_name=filename,
-            mime="text/plain",
+            mime="image/svg+xml",
         )
 
     except Exception as e:
         st.error(f"Errore nella generazione del barcode: {e}")
 
 else:
-    st.info("Inserisci un valore e premi 'Genera TXT'.")
+    st.info("Inserisci un valore e premi 'Genera SVG'.")
